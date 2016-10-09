@@ -9,11 +9,10 @@
 	<body>
 		<!-- for some reason non-minified three won't work -->
 		<script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
-		<script src="./js/PLYLoader.js"/>
+		<script src="./js/PLYLoader.js"></script>
+		<script src="./js/OrbitControls.js"></script>
 		<script>
-			console.log("hlo");
-		</script>
-		<script>
+		
 		var TreesDef = {
 		    types: [
 		        {
@@ -193,7 +192,7 @@
 	        this.loadingManager = new THREE.LoadingManager();
 
 			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+			var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
@@ -208,6 +207,8 @@
 
 			scene.add( trees );
 
+			camera.position.x = 0;
+			camera.position.y = 10;
 			camera.position.z = 5;
 
 			var render = function () {
@@ -220,6 +221,8 @@
 			};
 
 			render();
+
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
 		</script>
 	</body>
 </html>
