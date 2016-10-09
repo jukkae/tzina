@@ -11,6 +11,52 @@
 		<script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
 		<script src="./js/PLYLoader.js"></script>
 		<script src="./js/OrbitControls.js"></script>
+	    <script type="x-shader/x-vertex" id="vertexShader">
+			attribute vec4 vertCol;
+
+			varying vec4 vColor;
+
+			uniform float time; // this is time in milliseconds since epoch
+			float fBendScale = 1.5; // bend scale, calculate on CPU
+			vec2 vWind = vec2(0.5, 0.5); // wind direction
+			varying vec3 vNewPos;
+
+			void main(void) {
+			    //pos from gnd
+			    float fLength = length(position);
+			    //bending variation on CPU
+			    fBendScale = sin(time/50.0) + 2.0;
+			    float fBF = position.y * fBendScale;
+			    // Smooth bending factor and increase its nearby height limit.
+			    //fBF += 1.0;
+			    //fBF *= fBF;
+			    //fBF = fBF * fBF - fBF;
+			    // displace position
+			    vNewPos = position;
+			    vNewPos.xz += vWind.xy * fBF;
+
+			    gl_Position = projectionMatrix * modelViewMatrix * vec4( normalize(vNewPos.xyz)* fLength, 1.0 );
+			    gl_PointSize = 0.1;
+			}
+
+//	        varying vec2 vUv;
+
+//			void main() {
+//			    vUv = uv;
+//    			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+//    			gl_PointSize = 0.1;
+//			}
+	    </script>
+
+	    <script type="x-shader/x-fragment" id="fragmentShader">
+	        varying vec2 vUv;
+
+			void main() {
+			    // colour is RGBA: u, v, 0, 1
+			    // gl_FragColor = vec4( vec3( vUv, 0. ), 1. );
+			    gl_FragColor = vec4(1, 1, 1, 1);
+			}
+	    </script>
 		<script>
 		
 		var TreesDef = {
@@ -147,6 +193,8 @@
 		   
 		    ]
 		};
+		var uniforms = { time: { type: "f", value: 0 } };
+
 		const TREES_PATH = "./trees";
 
 		class Trees extends THREE.Object3D {
@@ -164,7 +212,16 @@
 			            let typePromises = TreesDef.types.map((type) => {return this.loadType(type, treeTypes)});
 			            Promise.all(typePromises)
 			            .then((results) => {
-			                let material = new THREE.PointsMaterial( { size: 0.13, vertexColors: true } );
+			                //let material = new THREE.PointsMaterial( { size: 0.13, vertexColors: true } );
+			                material = new THREE.ShaderMaterial( {
+			                	uniforms: uniforms,
+							    vertexShader: document.getElementById( 'vertexShader' ).textContent,
+							    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+							} );
+						//	material = new THREE.MeshBasicMaterial( { 
+						//        color: 0xb7ff00, 
+						//        wireframe: true 
+						//    } );
 			                TreesDef.instances.forEach((instance) => {
 			                    let mesh = new THREE.Points( treeTypes[instance.type], material );
 			                    mesh.position.fromArray(instance.position);
@@ -209,7 +266,9 @@
 
 			camera.position.x = 0;
 			camera.position.y = 10;
-			camera.position.z = 5;
+			camera.position.z = 0;
+			var clock = new THREE.Clock();
+			clock.start();
 
 			var render = function () {
 				requestAnimationFrame( render );
@@ -218,6 +277,8 @@
 				cube.rotation.y += 0.1;
 
 				renderer.render(scene, camera);
+				var delta = clock.getDelta();
+				uniforms.time.value += delta * 10;
 			};
 
 			render();
