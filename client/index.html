@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>My first Three.js app</title>
+		<title>Tree Three.js</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
@@ -9,7 +9,189 @@
 	<body>
 		<!-- for some reason non-minified three won't work -->
 		<script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+		<script src="./js/PLYLoader.js"/>
 		<script>
+			console.log("hlo");
+		</script>
+		<script>
+		var TreesDef = {
+		    types: [
+		        {
+		            name: "Test",
+		            fileName: "points.ply",
+		        },
+		                {
+		            name: "ThreeTrees",
+		            fileName: "3tress_2.ply"
+		        },
+		         {
+		            name: "palm",
+		            fileName: "palm.ply"
+		        },
+		         {
+		            name: "single",
+		            fileName: "singleTree.ply"
+		        },
+		            {
+		            name: "bush",
+		            fileName: "bush.ply"
+		        }
+		    ],
+		    instances: [
+		    
+		         {
+		            type: "ThreeTrees",
+		            position: [4,22,14],
+		            rotateX: -10,
+		            scale: 4.3
+		        },
+		        //  {
+		        //     type: "ThreeTrees",
+		        //     position: [4,22,14],
+		        //     rotateX: -10,
+		        //     scale: 4
+		        // },
+		        //  {
+		        //     type: "ThreeTrees",
+		        //     position: [42,24,2],
+		        //     rotateX: 0,
+		        //     scale: 4.4
+		        // }, 
+		        {
+		            type: "ThreeTrees",
+		            position: [43,24,3],
+		            rotateX: 0,
+		            scale: 4.4
+		        },
+		        {
+		            type: "ThreeTrees",
+		            position: [40,24,2],
+		            rotateX: 0,
+		            scale: 4.4
+		        },
+		        {
+		            type: "ThreeTrees",
+		            position: [20,24,-23],
+		            rotateX: 80,
+		            scale: 4.4
+		        },
+		      {
+		            type: "ThreeTrees",
+		            position: [30,24,-20],
+		            rotateX: 20,
+		            scale: 4.4
+		        },
+
+		 {
+		            type: "ThreeTrees",
+		            position: [30,24,-20],
+		            rotateX: 60,
+		            scale: 4.4
+		        },
+
+		 {
+		            type: "ThreeTrees",
+		            position: [30,24,-20],
+		            rotateX: 60,
+		            scale: 4.4
+		        },
+		    {
+		            type: "ThreeTrees",
+		            position: [6,23,-10],
+		            rotateX: 180,
+		            scale: 4.4
+		        },
+		   
+		    {
+		            type: "ThreeTrees",
+		            position: [-20,26,-20],
+		            rotateX: -30,
+		            scale: 4
+		        },
+		   
+
+		    
+		    
+		        {
+		            type: "palm",
+		            position: [-18,16,10],
+		            rotateX: -100,
+		            scale: 3
+		        },
+
+		        {
+		            type: "palm",
+		            position: [8,22,6],
+		            rotateX: 60,
+		            scale: 3
+		        },
+		         {
+		            type: "palm",
+		            position: [-38,20,-32],
+		            rotateX: 60,
+		            scale: 3.8
+		        },
+		        // {
+		        //     type: "single",
+		        //     position: [-52,18,2],
+		        //     rotateX: 100,
+		        //     scale: 3
+		        // },
+
+
+		        // {
+		        //     type: "single",
+		        //     position: [20,18,8],
+		        //     rotateX: 100,
+		        //     scale: 3
+		        // }
+		   
+		    ]
+		};
+		const TREES_PATH = "./trees";
+
+		class Trees extends THREE.Object3D {
+			    constructor() {
+			        super();
+			    }
+
+			    init(loadingManager) {
+			    	console.log("init trees loadingmanager");
+			        let treeTypes = {};
+			        this.treesLoader = new THREE.PLYLoader(loadingManager);
+
+			        return new Promise((resolve, reject) => {
+			            console.log("Loading trees", TreesDef)
+			            let typePromises = TreesDef.types.map((type) => {return this.loadType(type, treeTypes)});
+			            Promise.all(typePromises)
+			            .then((results) => {
+			                let material = new THREE.PointsMaterial( { size: 0.13, vertexColors: true } );
+			                TreesDef.instances.forEach((instance) => {
+			                    let mesh = new THREE.Points( treeTypes[instance.type], material );
+			                    mesh.position.fromArray(instance.position);
+			                    mesh.scale.set(0.25 * instance.scale, 0.25 * instance.scale, 0.25 * instance.scale);
+			                    mesh.rotateZ(90 * Math.PI / 180);
+			                    mesh.rotateX(instance.rotateX * Math.PI / 180);
+			                    this.add(mesh);
+			                    resolve();
+			                })
+			            });
+			        });      
+			    }
+
+			    loadType(props,store) {
+			        return new Promise((resolve, reject) => {
+			            console.log("Loading tree type ", props);
+			            this.treesLoader.load(TREES_PATH + "/" + props.fileName ,( geometry ) => {
+			                store[props.name] = geometry;
+			                resolve();
+			            });
+			        });
+			    }
+			}
+
+	        this.loadingManager = new THREE.LoadingManager();
+
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
@@ -20,6 +202,16 @@
 			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
 			var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 			var cube = new THREE.Mesh( geometry, material );
+
+			var trees = new Trees();
+			trees.init(loadingManager).then((results) => {
+	            console.log("Load results", results);
+	            let obj = results[0];
+	            obj.add(trees);
+
+			});
+//			trees.loadType("palm");
+
 			scene.add( cube );
 
 			camera.position.z = 5;
