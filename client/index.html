@@ -204,15 +204,9 @@
 			var cube = new THREE.Mesh( geometry, material );
 
 			var trees = new Trees();
-			trees.init(loadingManager).then((results) => {
-	            console.log("Load results", results);
-	            let obj = results[0];
-	            obj.add(trees);
+			trees.init(loadingManager);
 
-			});
-//			trees.loadType("palm");
-
-			scene.add( cube );
+			scene.add( trees );
 
 			camera.position.z = 5;
 
