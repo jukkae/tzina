@@ -12,13 +12,9 @@
 		<script src="./js/PLYLoader.js"></script>
 		<script src="./js/OrbitControls.js"></script>
 	    <script type="x-shader/x-vertex" id="vertexShader">
-			//attribute vec4 vertCol;
-
-			//varying vec3 color;
 			varying vec3 vColor;
 
-
-			uniform float time; // this is time in milliseconds since epoch
+			uniform float time;
 			float fBendScale = 1.5; // bend scale, calculate on CPU
 			vec2 vWind = vec2(0.5, 0.5); // wind direction
 			varying vec3 vNewPos;
@@ -41,27 +37,13 @@
 			    gl_Position = projectionMatrix * modelViewMatrix * vec4( normalize(vNewPos.xyz)* fLength, 1.0 );
 			    gl_PointSize = 0.5;
 			}
-
-//	        varying vec2 vUv;
-
-//			void main() {
-//			    vUv = uv;
-//    			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-//    			gl_PointSize = 0.1;
-//			}
 	    </script>
 
 	    <script type="x-shader/x-fragment" id="fragmentShader">
-	        //varying vec2 vUv;
-	        //varying vec3 color;
 	        varying vec3 vColor;
 
 			void main() {
-			    // colour is RGBA: u, v, 0, 1
-			    // gl_FragColor = vec4( vec3( vUv, 0. ), 1. );
-			    //gl_FragColor = vec4(1, 1, 1, 1);
 			    gl_FragColor = vec4(vColor.rgb, 1.0);
-			    //gl_FragColor = vec4(gl_FragCoord.x / 640.0, gl_FragCoord.y / 480.0, 0, 1);
 			}
 	    </script>
 		<script>
