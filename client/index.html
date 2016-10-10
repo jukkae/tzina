@@ -15,7 +15,7 @@
 			varying vec3 vColor;
 
 			uniform float time;
-			float fBendScale = 1.5; // bend scale, calculate on CPU
+			float fBendScale = 5.0; // bend scale, calculate on CPU
 			vec2 vWind = vec2(0.5, 0.5); // wind direction
 			varying vec3 vNewPos;
 
@@ -24,7 +24,7 @@
 			    //pos from gnd
 			    float fLength = length(position);
 			    //bending variation on CPU
-			    fBendScale = sin(time/50.0) + 2.0;
+			    fBendScale = (sin(time));
 			    float fBF = position.y * fBendScale;
 			    // Smooth bending factor and increase its nearby height limit.
 			    //fBF += 1.0;
@@ -35,7 +35,7 @@
 			    vNewPos.xz += vWind.xy * fBF;
 
 			    gl_Position = projectionMatrix * modelViewMatrix * vec4( normalize(vNewPos.xyz)* fLength, 1.0 );
-			    gl_PointSize = 0.5;
+			    gl_PointSize = 1.0;
 			}
 	    </script>
 
