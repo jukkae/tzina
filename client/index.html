@@ -253,9 +253,9 @@
 			scene.add( trees );
 
 			camera.position.x = 0;
-			camera.position.y = 70;
+			camera.position.y = 0;
 			camera.position.z = 0;
-			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) ); //look from straight above
+			camera.lookAt( new THREE.Vector3( 10, 15, 10 ) ); //look from straight above
 			var clock = new THREE.Clock();
 			clock.start();
 
@@ -273,6 +273,7 @@
 			render();
 
 			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls.target.set( 10, 15, 10 );
 		</script>
 	</body>
 </html>
