@@ -16,15 +16,13 @@
 
 			uniform float time;
 			float fBendScale = 5.0; // bend scale, calculate on CPU
-			vec2 vWind = vec2(0.5, 0.5); // wind direction
+			vec2 vWind = vec2(1.0, 0.0); // wind direction on xz-plane
 			varying vec3 vNewPos;
 
 			void main(void) {
 				vColor = color;
-			    //pos from gnd
-			    float fLength = length(position);
-			    //bending variation on CPU
-			    fBendScale = (sin(time));
+			    float fLength = length(position.xyz); // pos.xyz, b/c later use!
+			    fBendScale = (sin(time)+2.0);
 			    float fBF = position.y * fBendScale;
 			    // Smooth bending factor and increase its nearby height limit.
 			    //fBF += 1.0;
@@ -239,7 +237,7 @@
 	        this.loadingManager = new THREE.LoadingManager();
 
 			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
+			var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
@@ -255,8 +253,9 @@
 			scene.add( trees );
 
 			camera.position.x = 0;
-			camera.position.y = 10;
+			camera.position.y = 70;
 			camera.position.z = 0;
+			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) ); //look from straight above
 			var clock = new THREE.Clock();
 			clock.start();
 
