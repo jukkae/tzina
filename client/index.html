@@ -15,15 +15,15 @@
 			varying vec3 vColor;
 
 			uniform float time;
-			float fBendScale = 0.0; // bend scale, calculate on CPU
-			vec2 vWind = vec2(1.0, 0.5); // wind direction on xz-plane
+			uniform vec2 vWind; // wind direction on xz-plane
 			varying vec3 vNewPos;
 
 			void main(void) {
 				vColor = color;
 			    float fLength = length(position.xyz); // pos.xyz, b/c later use!
-			    fBendScale = (sin(time)+1.0)*0.05; //todo pick off 0.1 into uniform
-			    float fBF = position.x * fBendScale; // fucked up coordinate systems
+			    float fBendScale = (sin(time)+1.0)*0.05; //todo pick off 0.05 into uniform
+			    float clampedX = max(position.x, 0.0); //use only when above 0, which is actually somewhere in the middle of the trunk
+			    float fBF = clampedX * fBendScale; // fucked up coordinate systems
 			    // Smooth bending factor and increase its nearby height limit.
 			    //fBF += 1.0;
 			    //fBF *= fBF;
@@ -33,7 +33,7 @@
 			    vNewPos.yz += vWind.xy * fBF; // for some reason tree models' supposed xz plane is yz!! (-> x = height)
 
 			    gl_Position = projectionMatrix * modelViewMatrix * vec4( normalize(vNewPos.xyz)* fLength, 1.0 );
-			    gl_PointSize = 1.0;
+			    gl_PointSize = 2.0;
 			}
 	    </script>
 
@@ -180,7 +180,8 @@
 		   
 		    ]
 		};
-		var uniforms = { time: { type: "f", value: 0 } };
+		var uniforms = { time: { type: "f", value: 0 },
+		                 vWind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) } };
 
 		const TREES_PATH = "./trees";
 
