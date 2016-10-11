@@ -1,42 +1,45 @@
 <html>
 	<head>
-		<title>Tree Three.js</title>
+		<title>Tree Shaders</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
 		</style>
 	</head>
 	<body>
-		<!-- for some reason non-minified three won't work -->
+		<!-- for some reason non-minified three won't work on my system -->
 		<script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+		<!-- copy-pasted for quicker dev -->
 		<script src="./js/PLYLoader.js"></script>
+		<!-- camera controls for development -->
 		<script src="./js/OrbitControls.js"></script>
+
+		<!-- vertex shader -->
 	    <script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vColor;
 
 			uniform float time;
-			uniform vec2 vWind; // wind direction on xz-plane
-			varying vec3 vNewPos;
-
+			uniform float bendAmount;
+			uniform float speedFactor;
+			uniform float heightLimit;
+			uniform float pointSize;
+			uniform vec2 wind;
+			
 			void main(void) {
 				vColor = color;
-			    float fLength = length(position.xyz); // pos.xyz, b/c later use!
-			    float fBendScale = (sin(time)+1.0)*0.05; //todo pick off 0.05 into uniform
-			    float clampedX = max(position.x, 0.0); //use only when above 0, which is actually somewhere in the middle of the trunk
-			    float fBF = clampedX * fBendScale; // fucked up coordinate systems
-			    // Smooth bending factor and increase its nearby height limit.
-			    //fBF += 1.0;
-			    //fBF *= fBF;
-			    //fBF = fBF * fBF - fBF;
-			    // displace position
-			    vNewPos = position;
-			    vNewPos.yz += vWind.xy * fBF; // for some reason tree models' supposed xz plane is yz!! (-> x = height)
+			    float fLength = length(position.xyz);
+			    float fBend = (sin(time * speedFactor) + 1.0) * bendAmount;
+			    float clampedX = max(position.x, heightLimit); // coordinate system is rotated -> x is up
+			    float fBF = clampedX * fBend;
+			    vec3 vNewPos = position;
+			    vNewPos.yz += wind.xy * fBF; // trees' supposed xz plane is yz b/c rotation
 
-			    gl_Position = projectionMatrix * modelViewMatrix * vec4( normalize(vNewPos.xyz)* fLength, 1.0 );
-			    gl_PointSize = 2.0;
+			    gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
+			    gl_PointSize = pointSize;
 			}
 	    </script>
 
+	    <!-- fragment shader -->
 	    <script type="x-shader/x-fragment" id="fragmentShader">
 	        varying vec3 vColor;
 
@@ -44,8 +47,9 @@
 			    gl_FragColor = vec4(vColor.rgb, 1.0);
 			}
 	    </script>
+	    
 		<script>
-		
+		// sorry for the copy-paste, was the fastest way to get everything up & running		
 		var TreesDef = {
 		    types: [
 		        {
@@ -180,9 +184,17 @@
 		   
 		    ]
 		};
-		var uniforms = { time: { type: "f", value: 0 },
-		                 vWind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) } };
 
+		// here's the uniforms we'll need for the ShaderMaterial
+		var uniforms = { 
+			time: { type: "f", value: 0 },
+			bendAmount: { type: "f", value: 0.05 },
+			speedFactor: { type: "f", value: 1.0 },
+            wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
+            pointSize: { type: "f", value: 2.0 }
+        };
+
+        // again a bit dirty
 		const TREES_PATH = "./trees";
 
 		class Trees extends THREE.Object3D {
@@ -200,17 +212,14 @@
 			            let typePromises = TreesDef.types.map((type) => {return this.loadType(type, treeTypes)});
 			            Promise.all(typePromises)
 			            .then((results) => {
-			                //let material = new THREE.PointsMaterial( { size: 0.13, vertexColors: true } );
-			                material = new THREE.ShaderMaterial( {
+			                // this is the ShaderMaterial we need to use for the trees 
+			                var material = new THREE.ShaderMaterial( {
 			                	uniforms: uniforms,
 			                	vertexColors: THREE.VertexColors,
 							    vertexShader: document.getElementById( 'vertexShader' ).textContent,
 							    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
 							} );
-						//	material = new THREE.MeshBasicMaterial( { 
-						//        color: 0xb7ff00, 
-						//        wireframe: true 
-						//    } );
+							// end of interesting stuff
 			                TreesDef.instances.forEach((instance) => {
 			                    let mesh = new THREE.Points( treeTypes[instance.type], material );
 			                    mesh.position.fromArray(instance.position);
@@ -237,44 +246,39 @@
 
 	        this.loadingManager = new THREE.LoadingManager();
 
+	        // set up the scene & camera
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/window.innerHeight, 0.1, 1000 );
-
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
-
-			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-			var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-			var cube = new THREE.Mesh( geometry, material );
-
-			var trees = new Trees();
-			trees.init(loadingManager);
-
-			scene.add( trees );
-
 			camera.position.x = 0;
 			camera.position.y = 0;
 			camera.position.z = 0;
-			camera.lookAt( new THREE.Vector3( 10, 15, 10 ) ); //look from straight above
+			camera.lookAt( new THREE.Vector3( 10, 15, 10 ) );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls.target.set( 10, 15, 10 );
+
+			// load & add the trees
+			var trees = new Trees();
+			trees.init(loadingManager);
+			scene.add( trees );
+
+			// we need to pass delta time to the shader so we need a clock
 			var clock = new THREE.Clock();
 			clock.start();
 
 			var render = function () {
 				requestAnimationFrame( render );
-
-				cube.rotation.x += 0.1;
-				cube.rotation.y += 0.1;
-
 				renderer.render(scene, camera);
+
+				// update time
 				var delta = clock.getDelta();
 				uniforms.time.value += delta;
 			};
 
 			render();
 
-			controls = new THREE.OrbitControls( camera, renderer.domElement );
-			controls.target.set( 10, 15, 10 );
 		</script>
 	</body>
 </html>
