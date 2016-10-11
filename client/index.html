@@ -47,7 +47,7 @@
 			    gl_FragColor = vec4(vColor.rgb, 1.0);
 			}
 	    </script>
-	    
+
 		<script>
 		// sorry for the copy-paste, was the fastest way to get everything up & running		
 		var TreesDef = {
@@ -191,6 +191,7 @@
 			bendAmount: { type: "f", value: 0.05 },
 			speedFactor: { type: "f", value: 1.0 },
             wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
+            heightLimit: { type: "f", value: 0.0 },
             pointSize: { type: "f", value: 2.0 }
         };
 
