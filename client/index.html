@@ -33,6 +33,7 @@
 			uniform float pointSize;
 			uniform vec2 wind;
 			uniform float rustleHeightLimit;
+			uniform bool rustleColorCheck;
 
 			float fDetailFreq = 1.8;
 
@@ -71,13 +72,13 @@
 			    float fLength = length(pos.xyz);
 				// values by trial and error, mostly
 				if(pos.x > rustleHeightLimit) {
-					if(hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08) {
+					if(!rustleColorCheck || (hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08)) {
 						// vColor.r = 1.0; // uncomment to debug hsv comparisons
 						// vColor.g = 0.0;
 						// vColor.b = 0.0;
 						// rustle!
 						vec3 vNewPos = pos;
-						float fVtxPhase = pos.x;
+						float fVtxPhase = pos.y;
 						float fBranchPhase = pos.y;
 						vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
 						vec4 vWaves = (fract( vWavesIn.xxyy *
@@ -282,7 +283,8 @@
             wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
             heightLimit: { type: "f", value: 0.0 },
             pointSize: { type: "f", value: 2.0 },
-            rustleHeightLimit: { type: "f", value: 5.0 }
+            rustleHeightLimit: { type: "f", value: 5.0 },
+            rustleColorCheck: { type: "b", value: false }
         };
 
         // again a bit dirty
@@ -365,10 +367,13 @@
 				var f3 = gui.addFolder('wind');
 				//wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
 				var f4 = gui.addFolder('heightLimit');
-				f4.add(uniforms.heightLimit, 'value', -10, 10);
+				f4.add(uniforms.heightLimit, 'value', -50, 50);
 				var f5 = gui.addFolder('pointSize');
 				f5.add(uniforms.pointSize, 'value', 0, 5);
-				var f6 = gui.addFolder('rustleHeightLimit', -10, 10);
+				var f6 = gui.addFolder('rustleHeightLimit');
+				f6.add(uniforms.rustleHeightLimit, 'value', -50, 50);
+				var f7 = gui.addFolder('rustleColorCheck');
+				f7.add(uniforms.rustleColorCheck, 'value', 0, 1);
 			};
 
 
