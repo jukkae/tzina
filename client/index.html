@@ -33,8 +33,8 @@
 			uniform float pointSize;
 			uniform vec2 wind;
 
-			float fSpeed = 1.0;
-			float fDetailFreq = 1.0;
+			float fSpeed = 1.5;
+			float fDetailFreq = 2.0;
 
 			void bend(void);
 			void rustle(void);
@@ -68,22 +68,24 @@
 				vec3 hsv = rgb2hsv(color);
 			    float fLength = length(position.xyz);
 				// values by trial and error, mostly
-				if(hsv.x > 0.17 && hsv.x < 0.5 && hsv.y > 0.2 && hsv.z > 0.1) {
-					// vColor.r = 1.0; // uncomment to debug hsv comparisons
-					// vColor.g = 0.0;
-					// vColor.b = 0.0;
-					// rustle!
-					vec3 vNewPos = position;
-					float fVtxPhase = 1.0;
-					float fBranchPhase = 1.0;
-					vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
-					vec4 vWaves = (fract( vWavesIn.xxyy *
-					   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2) ) *
-					   2.0 - 1.0 ) * fSpeed * fDetailFreq;
-					vWaves = smoothTriangleWave( vWaves );
-					vec2 vWavesSum = vWaves.xz + vWaves.yw;  
-					vNewPos.y += vWavesSum.y;
-					gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
+				if(length(position.yz) > 12.0 && position.x > 5.0) {
+					if(hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.1) {
+						// vColor.r = 1.0; // uncomment to debug hsv comparisons
+						// vColor.g = 0.0;
+						// vColor.b = 0.0;
+						// rustle!
+						vec3 vNewPos = position;
+						float fVtxPhase = position.x;
+						float fBranchPhase = position.y;
+						vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
+						vec4 vWaves = (fract( vWavesIn.xxyy *
+						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2) ) *
+						   2.0 - 1.0 ) * fSpeed * fDetailFreq;
+						vWaves = smoothTriangleWave( vWaves );
+						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
+						vNewPos.y += vWavesSum.y;
+						gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
+					}
 				}
 			}
 
@@ -338,11 +340,11 @@
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
 			camera.position.x = 0;
-			camera.position.y = 0;
+			camera.position.y = 40;
 			camera.position.z = 0;
-			camera.lookAt( new THREE.Vector3( 10, 15, 10 ) );
+			camera.lookAt( new THREE.Vector3( 15, 40, 15 ) );
 			controls = new THREE.OrbitControls( camera, renderer.domElement );
-			controls.target.set( 10, 15, 10 );
+			controls.target.set( 15, 40, 15 );
 
 			// load & add the trees
 			var trees = new Trees();
