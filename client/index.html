@@ -33,8 +33,7 @@
 			uniform float pointSize;
 			uniform vec2 wind;
 
-			float fSpeed = 1.5;
-			float fDetailFreq = 2.0;
+			float fDetailFreq = 1.8;
 
 			void bend(inout vec3);
 			void rustle(inout vec3);
@@ -68,8 +67,8 @@
 				vec3 hsv = rgb2hsv(color);
 			    float fLength = length(pos.xyz);
 				// values by trial and error, mostly
-				if(length(pos.yz) > 12.0 && pos.x > 5.0) {
-					if(hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.1) {
+				if(pos.x > 5.0) { // lift 5.0
+					if(hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08) {
 						// vColor.r = 1.0; // uncomment to debug hsv comparisons
 						// vColor.g = 0.0;
 						// vColor.b = 0.0;
@@ -80,10 +79,11 @@
 						vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
 						vec4 vWaves = (fract( vWavesIn.xxyy *
 						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2) ) *
-						   2.0 - 1.0 ) * fSpeed * fDetailFreq;
+						   2.0 - 1.0 ) * speedFactor * fDetailFreq;
 						vWaves = smoothTriangleWave( vWaves );
 						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
-						vNewPos.y += vWavesSum.y;
+						vNewPos.y += vWavesSum.y * (pos.x - 5.0) / 20.0; // lift 5.0
+						vNewPos.z += vWavesSum.x / 10.0;
 						pos = vNewPos;
 					}
 				}
