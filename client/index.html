@@ -36,7 +36,7 @@
 			float fSpeed = 1.5;
 			float fDetailFreq = 2.0;
 
-			void bend(void);
+			void bend(inout vec3);
 			void rustle(void);
 			vec3 rgb2hsv(vec3);
 			vec3 hsv2rgb(vec3);
@@ -47,21 +47,25 @@
 			
 			void main(void) {
 				vColor = color;
+			    float fLength = length(position.xyz);
+			    vec3 pos = position;
 				// bending of the whole plant
-				bend();
+				bend(pos);
 				rustle();
 			    gl_PointSize = pointSize;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(pos.xyz) * fLength, 1.0);
 			}
 
-			void bend(void) {
-			    float fLength = length(position.xyz);
+			void bend(inout vec3 pos) {
+			    float fLength = length(pos.xyz);
 			    float fBend = (sin(time * speedFactor) + 1.0) * bendAmount;
-			    float clampedX = max(position.x, heightLimit); // coordinate system is rotated -> x is up
+			    float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
 			    float fBF = clampedX * fBend;
-			    vec3 vNewPos = position;
+			    vec3 vNewPos = pos;
 			    vNewPos.yz += wind.xy * fBF; // trees' supposed xz plane is yz b/c rotation
+			    pos = vNewPos;
 
-			    gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
+			    //gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
 			}
 
 			void rustle(void) {
@@ -83,7 +87,7 @@
 						   2.0 - 1.0 ) * fSpeed * fDetailFreq;
 						vWaves = smoothTriangleWave( vWaves );
 						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
-						vNewPos.y += vWavesSum.y;
+						vNewPos.y += vWavesSum.y / 10.0;
 						gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
 					}
 				}
