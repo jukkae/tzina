@@ -32,6 +32,7 @@
 			uniform float heightLimit;
 			uniform float pointSize;
 			uniform vec2 wind;
+			uniform float rustleHeightLimit;
 
 			float fDetailFreq = 1.8;
 
@@ -55,19 +56,21 @@
 			}
 
 			void bend(inout vec3 pos) {
+			    if(pos.x > heightLimit) {
 			    float fBend = (sin(time * speedFactor) + 1.0) * bendAmount;
 			    float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
-			    float fBF = clampedX * fBend;
-			    vec3 vNewPos = pos;
-			    vNewPos.yz += wind.xy * fBF; // trees' supposed xz plane is yz b/c rotation
-			    pos = vNewPos;
+			    float fBF = (clampedX - heightLimit) * fBend;
+			    	vec3 vNewPos = pos;
+			    	vNewPos.yz += wind.xy * fBF; // trees' supposed xz plane is yz b/c rotation
+			    	pos = vNewPos;
+				}
 			}
 
 			void rustle(inout vec3 pos) {
 				vec3 hsv = rgb2hsv(color);
 			    float fLength = length(pos.xyz);
 				// values by trial and error, mostly
-				if(pos.x > 5.0) { // lift 5.0
+				if(pos.x > rustleHeightLimit) {
 					if(hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08) {
 						// vColor.r = 1.0; // uncomment to debug hsv comparisons
 						// vColor.g = 0.0;
@@ -82,7 +85,7 @@
 						   2.0 - 1.0 ) * speedFactor * fDetailFreq;
 						vWaves = smoothTriangleWave( vWaves );
 						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
-						vNewPos.y += vWavesSum.y * (pos.x - 5.0) / 20.0; // lift 5.0
+						vNewPos.y += vWavesSum.y * (pos.x - rustleHeightLimit) / 20.0;
 						vNewPos.z += vWavesSum.x / 10.0;
 						pos = vNewPos;
 					}
@@ -278,7 +281,8 @@
 			speedFactor: { type: "f", value: 1.0 },
             wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
             heightLimit: { type: "f", value: 0.0 },
-            pointSize: { type: "f", value: 2.0 }
+            pointSize: { type: "f", value: 2.0 },
+            rustleHeightLimit: { type: "f", value: 5.0 }
         };
 
         // again a bit dirty
@@ -364,6 +368,7 @@
 				f4.add(uniforms.heightLimit, 'value', -10, 10);
 				var f5 = gui.addFolder('pointSize');
 				f5.add(uniforms.pointSize, 'value', 0, 5);
+				var f6 = gui.addFolder('rustleHeightLimit', -10, 10);
 			};
 
 
