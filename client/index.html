@@ -104,7 +104,7 @@
 			    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 			}
 
-			// crytek engine's math
+			// general math
 			float smoothCurve( float x ) {  
 				return x * x * ( 3.0 - 2.0 * x );  
 			}  
@@ -115,11 +115,11 @@
 				return smoothCurve( triangleWave( x ) );  
 			}
 			vec4 smoothTriangleWave( vec4 v ) {
-				v.x = smoothTriangleWave(v.x);
-				v.y = smoothTriangleWave(v.y);
-				v.z = smoothTriangleWave(v.z);
-				v.w = smoothTriangleWave(v.w);
-				return v;
+				float x = smoothTriangleWave(v.x);
+				float y = smoothTriangleWave(v.y);
+				float z = smoothTriangleWave(v.z);
+				float w = smoothTriangleWave(v.w);
+				return vec4(x, y, z, w);
 			}
 	    </script>
 
