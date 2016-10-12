@@ -9,6 +9,8 @@
 	<body>
 		<!-- for some reason non-minified three won't work on my system -->
 		<script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+		<!-- dat.gui for controls -->
+		<script src="./js/dat.gui.min.js"></script>
 		<!-- copy-pasted for quicker dev -->
 		<script src="./js/PLYLoader.js"></script>
 		<!-- camera controls for development -->
@@ -264,6 +266,23 @@
 			var trees = new Trees();
 			trees.init(loadingManager);
 			scene.add( trees );
+
+			// dat.gui
+			window.onload = function() {
+				var gui = new dat.GUI();
+				var f1 = gui.addFolder('bendAmount');
+				f1.add(uniforms.bendAmount, 'value', -0.5, 0.5);
+				var f2 = gui.addFolder('speedFactor');
+				f2.add(uniforms.speedFactor, 'value', -5, 5);
+				var f3 = gui.addFolder('wind');
+				//wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
+				var f4 = gui.addFolder('heightLimit');
+				f4.add(uniforms.heightLimit, 'value', -10, 10);
+				var f5 = gui.addFolder('pointSize');
+				f5.add(uniforms.pointSize, 'value', 0, 5);
+			};
+
+
 
 			// we need to pass delta time to the shader so we need a clock
 			var clock = new THREE.Clock();
