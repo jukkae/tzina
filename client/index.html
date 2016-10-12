@@ -37,7 +37,7 @@
 			float fDetailFreq = 2.0;
 
 			void bend(inout vec3);
-			void rustle(void);
+			void rustle(inout vec3);
 			vec3 rgb2hsv(vec3);
 			vec3 hsv2rgb(vec3);
 			float smoothCurve(float);
@@ -49,46 +49,42 @@
 				vColor = color;
 			    float fLength = length(position.xyz);
 			    vec3 pos = position;
-				// bending of the whole plant
 				bend(pos);
-				rustle();
+				rustle(pos);
 			    gl_PointSize = pointSize;
 				gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(pos.xyz) * fLength, 1.0);
 			}
 
 			void bend(inout vec3 pos) {
-			    float fLength = length(pos.xyz);
 			    float fBend = (sin(time * speedFactor) + 1.0) * bendAmount;
 			    float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
 			    float fBF = clampedX * fBend;
 			    vec3 vNewPos = pos;
 			    vNewPos.yz += wind.xy * fBF; // trees' supposed xz plane is yz b/c rotation
 			    pos = vNewPos;
-
-			    //gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
 			}
 
-			void rustle(void) {
+			void rustle(inout vec3 pos) {
 				vec3 hsv = rgb2hsv(color);
-			    float fLength = length(position.xyz);
+			    float fLength = length(pos.xyz);
 				// values by trial and error, mostly
-				if(length(position.yz) > 12.0 && position.x > 5.0) {
+				if(length(pos.yz) > 12.0 && pos.x > 5.0) {
 					if(hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.1) {
 						// vColor.r = 1.0; // uncomment to debug hsv comparisons
 						// vColor.g = 0.0;
 						// vColor.b = 0.0;
 						// rustle!
-						vec3 vNewPos = position;
-						float fVtxPhase = position.x;
-						float fBranchPhase = position.y;
+						vec3 vNewPos = pos;
+						float fVtxPhase = pos.x;
+						float fBranchPhase = pos.y;
 						vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
 						vec4 vWaves = (fract( vWavesIn.xxyy *
 						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2) ) *
 						   2.0 - 1.0 ) * fSpeed * fDetailFreq;
 						vWaves = smoothTriangleWave( vWaves );
 						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
-						vNewPos.y += vWavesSum.y / 10.0;
-						gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(vNewPos.xyz) * fLength, 1.0);
+						vNewPos.y += vWavesSum.y;
+						pos = vNewPos;
 					}
 				}
 			}
