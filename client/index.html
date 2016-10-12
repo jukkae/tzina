@@ -35,8 +35,7 @@
 			uniform float rustleHeightLimit;
 			uniform bool rustleColorCheck;
 			uniform float rustleFactor;
-
-			float fDetailFreq = 1.8;
+			uniform float rustleFrequency;
 
 			void bend(inout vec3);
 			void rustle(inout vec3);
@@ -85,7 +84,7 @@
 						vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
 						vec4 vWaves = (fract( vWavesIn.xxyy *
 						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2) ) *
-						   2.0 - 1.0 ) * speedFactor * fDetailFreq;
+						   2.0 - 1.0 ) * speedFactor * rustleFrequency;
 						vWaves = smoothTriangleWave( vWaves );
 						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
 						vNewPos.y += vWavesSum.y * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
@@ -287,7 +286,8 @@
             pointSize: { type: "f", value: 2.0 },
             rustleHeightLimit: { type: "f", value: 5.0 },
             rustleColorCheck: { type: "b", value: false },
-            rustleFactor: { type: "f", value: 4.0 }
+            rustleFactor: { type: "f", value: 4.0 },
+            rustleFrequency: { type: "f", value: 0.2 }
         };
 
         // again a bit dirty
@@ -379,6 +379,8 @@
 				f7.add(uniforms.rustleColorCheck, 'value', 0, 1);
 				var f8 = gui.addFolder('rustleFactor');
 				f8.add(uniforms.rustleFactor, 'value', 0, 10);
+				var f9 = gui.addFolder('rustleFrequency');
+				f9.add(uniforms.rustleFrequency, 'value', 0, 2);
 			};
 
 
