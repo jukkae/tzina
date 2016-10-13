@@ -65,9 +65,9 @@
 			    float bend = (sin(time * speedFactor) + 1.0) * bendAmount;
 			    float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
 			    float bf = (clampedX - heightLimit) * bend;
-			    	vec3 vNewPos = pos;
-			    	vNewPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation
-			    	pos = vNewPos;
+			    	vec3 newPos = pos;
+			    	newPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation
+			    	pos = newPos;
 				}
 			}
 
@@ -80,19 +80,19 @@
 						// vColor.g = 0.0;
 						// vColor.b = 0.0;
 						// rustle!
-						vec3 vNewPos = pos;
-						float fObjPhase = length(modelMatrix[3].xyz); // assign unique phase to each object
-						float fVtxPhase = pos.y + fObjPhase;
-						float fBranchPhase = pos.z + fObjPhase;
-						vec2 vWavesIn = vec2(fVtxPhase + time, fBranchPhase + time );
-						vec4 vWaves = (fract( vWavesIn.xxyy *
-						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2) ) *
-						   2.0 - 1.0 ) * speedFactor * rustleFrequency;
-						vWaves = smoothTriangleWave( vWaves );
-						vec2 vWavesSum = vWaves.xz + vWaves.yw;  
-						vNewPos.y += vWavesSum.y * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
-						vNewPos.z += vWavesSum.x * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
-						pos = vNewPos;
+						vec3 newPos = pos;
+						float objPhase = length(modelMatrix[3].xyz); // assign unique phase to each object
+						float vtxYPhase = pos.y + objPhase; // vary vertex phases according to location
+						float vtxZPhase = pos.z + objPhase; // on the yz plane (ground plane b/c rotated models)
+						vec2 wavesIn = vec2(vtxYPhase + time, vtxZPhase + time);
+						vec4 waves = (fract(wavesIn.xxyy *
+						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2)) *
+						   2.0 - 1.0 ) * speedFactor * rustleFrequency; // lifted from crytek paper: http://http.developer.nvidia.com/GPUGems3/gpugems3_ch16.html
+						waves = smoothTriangleWave(waves);
+						vec2 wavesSum = waves.xz + waves.yw;  
+						newPos.y += wavesSum.y * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
+						newPos.z += wavesSum.x * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
+						pos = newPos;
 					}
 				}
 			}
@@ -115,16 +115,16 @@
 			}
 
 			// general math
-			float smoothCurve( float x ) {  
-				return x * x * ( 3.0 - 2.0 * x );  
+			float smoothCurve(float x) {  
+				return x * x * (3.0 - 2.0 * x);  
 			}  
-			float triangleWave( float x ) {  
-				return abs( fract( x + 0.5 ) * 2.0 - 1.0 );  
+			float triangleWave(float x) {  
+				return abs(fract(x + 0.5) * 2.0 - 1.0);  
 			}  
-			float smoothTriangleWave( float x ) {  
-				return smoothCurve( triangleWave( x ) );  
+			float smoothTriangleWave(float x) {  
+				return smoothCurve(triangleWave(x) );  
 			}
-			vec4 smoothTriangleWave( vec4 v ) {
+			vec4 smoothTriangleWave(vec4 v) {
 				float x = smoothTriangleWave(v.x);
 				float y = smoothTriangleWave(v.y);
 				float z = smoothTriangleWave(v.z);
