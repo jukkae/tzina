@@ -30,9 +30,9 @@
 
 			// uniforms
 			uniform float time;
-			uniform float bendAmount;
 			uniform float speedFactor;
-			uniform float heightLimit;
+			uniform float bendAmount;
+			uniform float bendHeightLimit;
 			uniform float pointSize;
 			uniform vec2 wind;
 			uniform float rustleHeightLimit;
@@ -61,10 +61,10 @@
 			}
 
 			void bend(inout vec3 pos) {
-				if(pos.x > heightLimit) {
+				if(pos.x > bendHeightLimit) {
 				float bend = (sin(time * speedFactor) + 1.0) * bendAmount;
-				float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
-				float bf = (clampedX - heightLimit) * bend;
+				float clampedX = max(pos.x, bendHeightLimit); // coordinate system is rotated -> x is up
+				float bf = (clampedX - bendHeightLimit) * bend;
 					vec3 newPos = pos;
 					newPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation; if the wind direction is off, flip the coordinates
 					pos = newPos;
@@ -284,7 +284,7 @@
 			bendAmount: { type: "f", value: 0.05 },
 			speedFactor: { type: "f", value: 1.0 },
 			wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
-			heightLimit: { type: "f", value: 0.0 },
+			bendHeightLimit: { type: "f", value: 0.0 },
 			pointSize: { type: "f", value: 2.0 },
 			rustleHeightLimit: { type: "f", value: 5.0 },
 			rustleColorCheck: { type: "b", value: false },
@@ -371,8 +371,8 @@
 				f2.add(uniforms.speedFactor, 'value', -5, 5);
 				var f3 = gui.addFolder('wind');
 				//wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
-				var f4 = gui.addFolder('heightLimit');
-				f4.add(uniforms.heightLimit, 'value', -50, 50);
+				var f4 = gui.addFolder('bendHeightLimit');
+				f4.add(uniforms.bendHeightLimit, 'value', -50, 50);
 				var f5 = gui.addFolder('pointSize');
 				f5.add(uniforms.pointSize, 'value', 0, 5);
 				var f6 = gui.addFolder('rustleHeightLimit');
