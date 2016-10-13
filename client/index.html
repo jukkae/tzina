@@ -29,16 +29,21 @@
 			varying vec3 vColor;
 
 			// uniforms
-			uniform float time;
-			uniform float speedFactor;
-			uniform float bendAmount;
-			uniform float bendHeightLimit;
-			uniform float pointSize;
-			uniform vec2 wind;
-			uniform float rustleHeightLimit;
-			uniform bool rustleColorCheck;
-			uniform float rustleFactor;
-			uniform float rustleFrequency;
+			// common uniforms
+			uniform float time; // increase by delta time in render loop
+			uniform float speedFactor; // larger value -> faster bending and rustling
+			uniform float pointSize; // rendering point size
+
+			// bending uniforms
+			uniform float bendFactor; // amount of bending
+			uniform float bendHeightLimit; // the height above which the bending starts
+			uniform vec2 wind; // direction & speed of the wind on the xz plane - note: only affects bending
+
+			// rustling uniforms
+			uniform float rustleHeightLimit; // the height above which the rustling starts
+			uniform bool rustleColorCheck; // use color checking for limiting rustling; currently not usable; see rustle()
+			uniform float rustleFactor; // amount of rustling
+			uniform float rustleFrequency; // frequency of rustles
 
 			// functions
 			void bend(inout vec3);
@@ -62,7 +67,7 @@
 
 			void bend(inout vec3 pos) {
 				if(pos.x > bendHeightLimit) {
-				float bend = (sin(time * speedFactor) + 1.0) * bendAmount;
+				float bend = (sin(time * speedFactor) + 1.0) * bendFactor;
 				float clampedX = max(pos.x, bendHeightLimit); // coordinate system is rotated -> x is up
 				float bf = (clampedX - bendHeightLimit) * bend;
 					vec3 newPos = pos;
@@ -142,7 +147,6 @@
 		</script>
 
 		<script>
-		// sorry for the copy-paste, was the fastest way to get everything up & running		
 		var TreesDef = {
 			types: [
 				{
@@ -281,7 +285,7 @@
 		// here's the uniforms we'll need for the ShaderMaterial
 		var uniforms = { 
 			time: { type: "f", value: 0 },
-			bendAmount: { type: "f", value: 0.05 },
+			bendFactor: { type: "f", value: 0.05 },
 			speedFactor: { type: "f", value: 1.0 },
 			wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
 			bendHeightLimit: { type: "f", value: 0.0 },
@@ -365,8 +369,8 @@
 			// dat.gui
 			window.onload = function() {
 				var gui = new dat.GUI();
-				var f1 = gui.addFolder('bendAmount');
-				f1.add(uniforms.bendAmount, 'value', -0.5, 0.5);
+				var f1 = gui.addFolder('bendFactor');
+				f1.add(uniforms.bendFactor, 'value', -0.5, 0.5);
 				var f2 = gui.addFolder('speedFactor');
 				f2.add(uniforms.speedFactor, 'value', -5, 5);
 				var f3 = gui.addFolder('wind');
