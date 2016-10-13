@@ -17,11 +17,11 @@
 		<script src="./js/OrbitControls.js"></script>
 
 		<!-- vertex shader -->
-	    <script type="x-shader/x-vertex" id="vertexShader">
+		<script type="x-shader/x-vertex" id="vertexShader">
 
-	    	// frequencies for rustling animation
-	    	// can be tweaked to taste
-	    	#define SIDE_TO_SIDE_FREQ1 1.975
+			// frequencies for rustling animation
+			// can be tweaked to taste
+			#define SIDE_TO_SIDE_FREQ1 1.975
 			#define SIDE_TO_SIDE_FREQ2 0.793
 			#define UP_AND_DOWN_FREQ1 0.375
 			#define UP_AND_DOWN_FREQ2 0.193
@@ -52,34 +52,33 @@
 			
 			void main(void) {
 				vColor = color;
-			    float length = length(position.xyz);
-			    vec3 pos = position;
+				float length = length(position.xyz);
+				vec3 pos = position;
 				bend(pos);
 				rustle(pos);
-			    gl_PointSize = pointSize;
+				gl_PointSize = pointSize;
 				gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(pos.xyz) * length, 1.0);
 			}
 
 			void bend(inout vec3 pos) {
-			    if(pos.x > heightLimit) {
-			    float bend = (sin(time * speedFactor) + 1.0) * bendAmount;
-			    float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
-			    float bf = (clampedX - heightLimit) * bend;
-			    	vec3 newPos = pos;
-			    	newPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation
-			    	pos = newPos;
+				if(pos.x > heightLimit) {
+				float bend = (sin(time * speedFactor) + 1.0) * bendAmount;
+				float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
+				float bf = (clampedX - heightLimit) * bend;
+					vec3 newPos = pos;
+					newPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation
+					pos = newPos;
 				}
 			}
 
 			void rustle(inout vec3 pos) {
 				vec3 hsv = rgb2hsv(color);
-			    // values by trial and error, mostly
+				// values by trial and error, mostly
 				if(pos.x > rustleHeightLimit) {
 					if(!rustleColorCheck || (hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08)) {
 						// vColor.r = 1.0; // uncomment to debug hsv comparisons
 						// vColor.g = 0.0;
 						// vColor.b = 0.0;
-						// rustle!
 						vec3 newPos = pos;
 						float objPhase = length(modelMatrix[3].xyz); // assign unique phase to each object
 						float vtxYPhase = pos.y + objPhase; // vary vertex phases according to location
@@ -99,19 +98,19 @@
 
 			// run-of-the-mill rgb-hsv-conversions
 			vec3 rgb2hsv(vec3 c) {
-			    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-			    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-			    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+				vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+				vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+				vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
 
-			    float d = q.x - min(q.w, q.y);
-			    float e = 1.0e-10;
-			    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+				float d = q.x - min(q.w, q.y);
+				float e = 1.0e-10;
+				return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 			}
 
 			vec3 hsv2rgb(vec3 c) {
-			    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-			    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-			    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+				vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+				vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+				return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 			}
 
 			// general math
@@ -131,152 +130,152 @@
 				float w = smoothTriangleWave(v.w);
 				return vec4(x, y, z, w);
 			}
-	    </script>
+		</script>
 
-	    <!-- fragment shader -->
-	    <script type="x-shader/x-fragment" id="fragmentShader">
-	        varying vec3 vColor;
+		<!-- fragment shader -->
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			varying vec3 vColor;
 
 			void main() {
-			    gl_FragColor = vec4(vColor.rgb, 1.0);
+				gl_FragColor = vec4(vColor.rgb, 1.0);
 			}
-	    </script>
+		</script>
 
 		<script>
 		// sorry for the copy-paste, was the fastest way to get everything up & running		
 		var TreesDef = {
-		    types: [
-		        {
-		            name: "Test",
-		            fileName: "points.ply",
-		        },
-		                {
-		            name: "ThreeTrees",
-		            fileName: "3tress_2.ply"
-		        },
-		         {
-		            name: "palm",
-		            fileName: "palm.ply"
-		        },
-		         {
-		            name: "single",
-		            fileName: "singleTree.ply"
-		        },
-		            {
-		            name: "bush",
-		            fileName: "bush.ply"
-		        }
-		    ],
-		    instances: [
-		    
-		         {
-		            type: "ThreeTrees",
-		            position: [4,22,14],
-		            rotateX: -10,
-		            scale: 4.3
-		        },
-		        //  {
-		        //     type: "ThreeTrees",
-		        //     position: [4,22,14],
-		        //     rotateX: -10,
-		        //     scale: 4
-		        // },
-		        //  {
-		        //     type: "ThreeTrees",
-		        //     position: [42,24,2],
-		        //     rotateX: 0,
-		        //     scale: 4.4
-		        // }, 
-		        {
-		            type: "ThreeTrees",
-		            position: [43,24,3],
-		            rotateX: 0,
-		            scale: 4.4
-		        },
-		        {
-		            type: "ThreeTrees",
-		            position: [40,24,2],
-		            rotateX: 0,
-		            scale: 4.4
-		        },
-		        {
-		            type: "ThreeTrees",
-		            position: [20,24,-23],
-		            rotateX: 80,
-		            scale: 4.4
-		        },
-		      {
-		            type: "ThreeTrees",
-		            position: [30,24,-20],
-		            rotateX: 20,
-		            scale: 4.4
-		        },
+			types: [
+				{
+					name: "Test",
+					fileName: "points.ply",
+				},
+						{
+					name: "ThreeTrees",
+					fileName: "3tress_2.ply"
+				},
+				 {
+					name: "palm",
+					fileName: "palm.ply"
+				},
+				 {
+					name: "single",
+					fileName: "singleTree.ply"
+				},
+					{
+					name: "bush",
+					fileName: "bush.ply"
+				}
+			],
+			instances: [
+			
+				 {
+					type: "ThreeTrees",
+					position: [4,22,14],
+					rotateX: -10,
+					scale: 4.3
+				},
+				//  {
+				//     type: "ThreeTrees",
+				//     position: [4,22,14],
+				//     rotateX: -10,
+				//     scale: 4
+				// },
+				//  {
+				//     type: "ThreeTrees",
+				//     position: [42,24,2],
+				//     rotateX: 0,
+				//     scale: 4.4
+				// }, 
+				{
+					type: "ThreeTrees",
+					position: [43,24,3],
+					rotateX: 0,
+					scale: 4.4
+				},
+				{
+					type: "ThreeTrees",
+					position: [40,24,2],
+					rotateX: 0,
+					scale: 4.4
+				},
+				{
+					type: "ThreeTrees",
+					position: [20,24,-23],
+					rotateX: 80,
+					scale: 4.4
+				},
+			  {
+					type: "ThreeTrees",
+					position: [30,24,-20],
+					rotateX: 20,
+					scale: 4.4
+				},
 
 		 {
-		            type: "ThreeTrees",
-		            position: [30,24,-20],
-		            rotateX: 60,
-		            scale: 4.4
-		        },
+					type: "ThreeTrees",
+					position: [30,24,-20],
+					rotateX: 60,
+					scale: 4.4
+				},
 
 		 {
-		            type: "ThreeTrees",
-		            position: [30,24,-20],
-		            rotateX: 60,
-		            scale: 4.4
-		        },
-		    {
-		            type: "ThreeTrees",
-		            position: [6,23,-10],
-		            rotateX: 180,
-		            scale: 4.4
-		        },
+					type: "ThreeTrees",
+					position: [30,24,-20],
+					rotateX: 60,
+					scale: 4.4
+				},
+			{
+					type: "ThreeTrees",
+					position: [6,23,-10],
+					rotateX: 180,
+					scale: 4.4
+				},
 		   
-		    {
-		            type: "ThreeTrees",
-		            position: [-20,26,-20],
-		            rotateX: -30,
-		            scale: 4
-		        },
+			{
+					type: "ThreeTrees",
+					position: [-20,26,-20],
+					rotateX: -30,
+					scale: 4
+				},
 		   
 
-		    
-		    
-		        {
-		            type: "palm",
-		            position: [-18,16,10],
-		            rotateX: -100,
-		            scale: 3
-		        },
+			
+			
+				{
+					type: "palm",
+					position: [-18,16,10],
+					rotateX: -100,
+					scale: 3
+				},
 
-		        {
-		            type: "palm",
-		            position: [8,22,6],
-		            rotateX: 60,
-		            scale: 3
-		        },
-		         {
-		            type: "palm",
-		            position: [-38,20,-32],
-		            rotateX: 60,
-		            scale: 3.8
-		        },
-		        // {
-		        //     type: "single",
-		        //     position: [-52,18,2],
-		        //     rotateX: 100,
-		        //     scale: 3
-		        // },
+				{
+					type: "palm",
+					position: [8,22,6],
+					rotateX: 60,
+					scale: 3
+				},
+				 {
+					type: "palm",
+					position: [-38,20,-32],
+					rotateX: 60,
+					scale: 3.8
+				},
+				// {
+				//     type: "single",
+				//     position: [-52,18,2],
+				//     rotateX: 100,
+				//     scale: 3
+				// },
 
 
-		        // {
-		        //     type: "single",
-		        //     position: [20,18,8],
-		        //     rotateX: 100,
-		        //     scale: 3
-		        // }
+				// {
+				//     type: "single",
+				//     position: [20,18,8],
+				//     rotateX: 100,
+				//     scale: 3
+				// }
 		   
-		    ]
+			]
 		};
 
 		// here's the uniforms we'll need for the ShaderMaterial
@@ -284,68 +283,68 @@
 			time: { type: "f", value: 0 },
 			bendAmount: { type: "f", value: 0.05 },
 			speedFactor: { type: "f", value: 1.0 },
-            wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
-            heightLimit: { type: "f", value: 0.0 },
-            pointSize: { type: "f", value: 2.0 },
-            rustleHeightLimit: { type: "f", value: 5.0 },
-            rustleColorCheck: { type: "b", value: false },
-            rustleFactor: { type: "f", value: 4.0 },
-            rustleFrequency: { type: "f", value: 0.2 }
-        };
+			wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
+			heightLimit: { type: "f", value: 0.0 },
+			pointSize: { type: "f", value: 2.0 },
+			rustleHeightLimit: { type: "f", value: 5.0 },
+			rustleColorCheck: { type: "b", value: false },
+			rustleFactor: { type: "f", value: 4.0 },
+			rustleFrequency: { type: "f", value: 0.2 }
+		};
 
-        // again a bit dirty
+		// again a bit dirty
 		const TREES_PATH = "./trees";
 
 		class Trees extends THREE.Object3D {
-			    constructor() {
-			        super();
-			    }
+				constructor() {
+					super();
+				}
 
-			    init(loadingManager) {
-			    	console.log("init trees loadingmanager");
-			        let treeTypes = {};
-			        this.treesLoader = new THREE.PLYLoader(loadingManager);
+				init(loadingManager) {
+					console.log("init trees loadingmanager");
+					let treeTypes = {};
+					this.treesLoader = new THREE.PLYLoader(loadingManager);
 
-			        return new Promise((resolve, reject) => {
-			            console.log("Loading trees", TreesDef)
-			            let typePromises = TreesDef.types.map((type) => {return this.loadType(type, treeTypes)});
-			            Promise.all(typePromises)
-			            .then((results) => {
-			                // this is the ShaderMaterial we need to use for the trees 
-			                var material = new THREE.ShaderMaterial( {
-			                	uniforms: uniforms,
-			                	vertexColors: THREE.VertexColors,
-							    vertexShader: document.getElementById( 'vertexShader' ).textContent,
-							    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+					return new Promise((resolve, reject) => {
+						console.log("Loading trees", TreesDef)
+						let typePromises = TreesDef.types.map((type) => {return this.loadType(type, treeTypes)});
+						Promise.all(typePromises)
+						.then((results) => {
+							// this is the ShaderMaterial we need to use for the trees 
+							var material = new THREE.ShaderMaterial( {
+								uniforms: uniforms,
+								vertexColors: THREE.VertexColors,
+								vertexShader: document.getElementById( 'vertexShader' ).textContent,
+								fragmentShader: document.getElementById( 'fragmentShader' ).textContent
 							} );
 							// end of interesting stuff
-			                TreesDef.instances.forEach((instance) => {
-			                    let mesh = new THREE.Points( treeTypes[instance.type], material );
-			                    mesh.position.fromArray(instance.position);
-			                    mesh.scale.set(0.25 * instance.scale, 0.25 * instance.scale, 0.25 * instance.scale);
-			                    mesh.rotateZ(90 * Math.PI / 180);
-			                    mesh.rotateX(instance.rotateX * Math.PI / 180);
-			                    this.add(mesh);
-			                    resolve();
-			                })
-			            });
-			        });      
-			    }
+							TreesDef.instances.forEach((instance) => {
+								let mesh = new THREE.Points( treeTypes[instance.type], material );
+								mesh.position.fromArray(instance.position);
+								mesh.scale.set(0.25 * instance.scale, 0.25 * instance.scale, 0.25 * instance.scale);
+								mesh.rotateZ(90 * Math.PI / 180);
+								mesh.rotateX(instance.rotateX * Math.PI / 180);
+								this.add(mesh);
+								resolve();
+							})
+						});
+					});      
+				}
 
-			    loadType(props,store) {
-			        return new Promise((resolve, reject) => {
-			            console.log("Loading tree type ", props);
-			            this.treesLoader.load(TREES_PATH + "/" + props.fileName ,( geometry ) => {
-			                store[props.name] = geometry;
-			                resolve();
-			            });
-			        });
-			    }
+				loadType(props,store) {
+					return new Promise((resolve, reject) => {
+						console.log("Loading tree type ", props);
+						this.treesLoader.load(TREES_PATH + "/" + props.fileName ,( geometry ) => {
+							store[props.name] = geometry;
+							resolve();
+						});
+					});
+				}
 			}
 
-	        this.loadingManager = new THREE.LoadingManager();
+			this.loadingManager = new THREE.LoadingManager();
 
-	        // set up the scene & camera
+			// set up the scene & camera
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/window.innerHeight, 0.1, 1000 );
 			var renderer = new THREE.WebGLRenderer();
