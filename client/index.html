@@ -66,7 +66,7 @@
 				float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
 				float bf = (clampedX - heightLimit) * bend;
 					vec3 newPos = pos;
-					newPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation
+					newPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation; if the wind direction is off, flip the coordinates
 					pos = newPos;
 				}
 			}
@@ -76,7 +76,7 @@
 				// values by trial and error, mostly
 				if(pos.x > rustleHeightLimit) {
 					if(!rustleColorCheck || (hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08)) {
-						// vColor.r = 1.0; // uncomment to debug hsv comparisons
+						// vColor.r = 1.0; // uncomment to debug height limit and HVS comparisons
 						// vColor.g = 0.0;
 						// vColor.b = 0.0;
 						vec3 newPos = pos;
@@ -88,7 +88,7 @@
 						   vec4(SIDE_TO_SIDE_FREQ1, SIDE_TO_SIDE_FREQ2, UP_AND_DOWN_FREQ1, UP_AND_DOWN_FREQ2)) *
 						   2.0 - 1.0 ) * speedFactor * rustleFrequency; // lifted from crytek paper: http://http.developer.nvidia.com/GPUGems3/gpugems3_ch16.html
 						waves = smoothTriangleWave(waves);
-						vec2 wavesSum = waves.xz + waves.yw;  
+						vec2 wavesSum = waves.xz + waves.yw;
 						newPos.y += wavesSum.y * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
 						newPos.z += wavesSum.x * (pos.x - rustleHeightLimit) * rustleFactor / 100.0;
 						pos = newPos;
@@ -114,14 +114,14 @@
 			}
 
 			// general math
-			float smoothCurve(float x) {  
-				return x * x * (3.0 - 2.0 * x);  
-			}  
-			float triangleWave(float x) {  
-				return abs(fract(x + 0.5) * 2.0 - 1.0);  
-			}  
-			float smoothTriangleWave(float x) {  
-				return smoothCurve(triangleWave(x) );  
+			float smoothCurve(float x) {
+				return x * x * (3.0 - 2.0 * x);
+			}
+			float triangleWave(float x) {
+				return abs(fract(x + 0.5) * 2.0 - 1.0);
+			}
+			float smoothTriangleWave(float x) {
+				return smoothCurve(triangleWave(x));
 			}
 			vec4 smoothTriangleWave(vec4 v) {
 				float x = smoothTriangleWave(v.x);
