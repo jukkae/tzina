@@ -19,6 +19,8 @@
 		<!-- vertex shader -->
 	    <script type="x-shader/x-vertex" id="vertexShader">
 
+	    	// frequencies for rustling animation
+	    	// can be tweaked to taste
 	    	#define SIDE_TO_SIDE_FREQ1 1.975
 			#define SIDE_TO_SIDE_FREQ2 0.793
 			#define UP_AND_DOWN_FREQ1 0.375
@@ -26,6 +28,7 @@
 			
 			varying vec3 vColor;
 
+			// uniforms
 			uniform float time;
 			uniform float bendAmount;
 			uniform float speedFactor;
@@ -37,6 +40,7 @@
 			uniform float rustleFactor;
 			uniform float rustleFrequency;
 
+			// functions
 			void bend(inout vec3);
 			void rustle(inout vec3);
 			vec3 rgb2hsv(vec3);
@@ -48,29 +52,28 @@
 			
 			void main(void) {
 				vColor = color;
-			    float fLength = length(position.xyz);
+			    float length = length(position.xyz);
 			    vec3 pos = position;
 				bend(pos);
 				rustle(pos);
 			    gl_PointSize = pointSize;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(pos.xyz) * fLength, 1.0);
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(normalize(pos.xyz) * length, 1.0);
 			}
 
 			void bend(inout vec3 pos) {
 			    if(pos.x > heightLimit) {
-			    float fBend = (sin(time * speedFactor) + 1.0) * bendAmount;
+			    float bend = (sin(time * speedFactor) + 1.0) * bendAmount;
 			    float clampedX = max(pos.x, heightLimit); // coordinate system is rotated -> x is up
-			    float fBF = (clampedX - heightLimit) * fBend;
+			    float bf = (clampedX - heightLimit) * bend;
 			    	vec3 vNewPos = pos;
-			    	vNewPos.yz += wind.xy * fBF; // trees' supposed xz plane is yz b/c rotation
+			    	vNewPos.yz += wind.xy * bf; // trees' supposed xz plane is yz b/c rotation
 			    	pos = vNewPos;
 				}
 			}
 
 			void rustle(inout vec3 pos) {
 				vec3 hsv = rgb2hsv(color);
-			    float fLength = length(pos.xyz);
-				// values by trial and error, mostly
+			    // values by trial and error, mostly
 				if(pos.x > rustleHeightLimit) {
 					if(!rustleColorCheck || (hsv.x > 0.16 && hsv.x < 0.5 && hsv.y > 0.18 && hsv.z > 0.08)) {
 						// vColor.r = 1.0; // uncomment to debug hsv comparisons
