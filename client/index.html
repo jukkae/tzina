@@ -285,11 +285,11 @@
 		// here's the uniforms we'll need for the ShaderMaterial
 		var uniforms = { 
 			time: { type: "f", value: 0 },
-			bendFactor: { type: "f", value: 0.05 },
 			speedFactor: { type: "f", value: 1.0 },
-			wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
-			bendHeightLimit: { type: "f", value: 0.0 },
 			pointSize: { type: "f", value: 2.0 },
+			bendFactor: { type: "f", value: 0.05 },
+			bendHeightLimit: { type: "f", value: 0.0 },
+			wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
 			rustleHeightLimit: { type: "f", value: 5.0 },
 			rustleColorCheck: { type: "b", value: false },
 			rustleFactor: { type: "f", value: 4.0 },
@@ -369,24 +369,28 @@
 			// dat.gui
 			window.onload = function() {
 				var gui = new dat.GUI();
-				var f1 = gui.addFolder('bendFactor');
-				f1.add(uniforms.bendFactor, 'value', -0.5, 0.5);
-				var f2 = gui.addFolder('speedFactor');
-				f2.add(uniforms.speedFactor, 'value', -5, 5);
-				var f3 = gui.addFolder('wind');
-				//wind: { type: "v2", value: new THREE.Vector2 ( 1.0, 0.5 ) },
-				var f4 = gui.addFolder('bendHeightLimit');
-				f4.add(uniforms.bendHeightLimit, 'value', -50, 50);
-				var f5 = gui.addFolder('pointSize');
-				f5.add(uniforms.pointSize, 'value', 0, 5);
-				var f6 = gui.addFolder('rustleHeightLimit');
-				f6.add(uniforms.rustleHeightLimit, 'value', -50, 50);
-				var f7 = gui.addFolder('rustleColorCheck');
-				f7.add(uniforms.rustleColorCheck, 'value', 0, 1);
-				var f8 = gui.addFolder('rustleFactor');
-				f8.add(uniforms.rustleFactor, 'value', 0, 10);
-				var f9 = gui.addFolder('rustleFrequency');
-				f9.add(uniforms.rustleFrequency, 'value', 0, 2);
+				var fa = gui.addFolder('common');
+				var fa0 = fa.addFolder('speedFactor');
+				fa0.add(uniforms.speedFactor, 'value', -5, 5);
+				var fa1 = fa.addFolder('pointSize');
+				fa1.add(uniforms.pointSize, 'value', 0, 5);
+				
+				var fb = gui.addFolder('bending');
+				var fb0 = fb.addFolder('bendFactor');
+				fb0.add(uniforms.bendFactor, 'value', -0.5, 0.5);
+				var fb1 = fb.addFolder('wind'); // couldn't get wind gui working b/c js doesn't really have vec2s
+				var fb2 = fb.addFolder('bendHeightLimit');
+				fb2.add(uniforms.bendHeightLimit, 'value', -50, 50);
+				
+				var fc = gui.addFolder('rustling');
+				var fc0 = fc.addFolder('rustleHeightLimit');
+				fc0.add(uniforms.rustleHeightLimit, 'value', -50, 50);
+				var fc1 = fc.addFolder('rustleColorCheck');
+				fc1.add(uniforms.rustleColorCheck, 'value', 0, 1);
+				var fc2 = fc.addFolder('rustleFactor');
+				fc2.add(uniforms.rustleFactor, 'value', 0, 10);
+				var fc3 = fc.addFolder('rustleFrequency');
+				fc3.add(uniforms.rustleFrequency, 'value', 0, 2);
 			};
 
 
